@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy import select
 from app.models.models import User
 from app.schemas.schemas import UserCreate, UserResponse
 from database import get_db
@@ -22,3 +22,9 @@ async def create_user(
     await db.refresh(user)
 
     return user
+
+
+@router.get("/users", response_model=list[UserResponse])
+async def list_users(db: AsyncSession = Depends(get_db)):
+    result = await db.scalars(select(User).order_by(User.id))
+    return result.all()
